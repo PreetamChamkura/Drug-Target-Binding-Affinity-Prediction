@@ -31,3 +31,26 @@ Isoelectric point - pH at neutral charge
 Aromaticity - Aromatic amino acid content
 Instability index - Protein stability measure
 GRAVY score - Hydrophobicity index
+
+🚀 Setup
+```bash
+conda env create -f environment.yml
+conda activate dta
+```
+
+The dataset is fetched automatically via [PyTDC](https://tdcommons.ai/) rather than committed to the repo:
+```bash
+python -m src.features        # downloads DAVIS, extracts features -> data/davis_features.csv
+python -m src.train_baseline  # trains baseline models -> results/
+```
+
+🤖 Baseline Models
+Random Forest, XGBoost, and a Ridge regression baseline are trained on the extracted drug + protein descriptors to predict pKd (`-log10(Kd in M)`). Evaluated with RMSE, MAE, R², and Concordance Index (CI), the standard ranking metric for drug-target affinity tasks.
+
+| Model | RMSE | MAE | R² | CI |
+|---|---|---|---|---|
+| Ridge | 0.790 | 0.538 | 0.114 | 0.667 |
+| Random Forest | 0.652 | 0.399 | 0.396 | 0.815 |
+| XGBoost | 0.645 | 0.404 | 0.408 | 0.816 |
+
+Descriptor-based features top out around R²≈0.41 — the next step to push performance further is learned representations (e.g. molecular graph embeddings for drugs, CNN/transformer embeddings for protein sequences) instead of hand-crafted descriptors.
