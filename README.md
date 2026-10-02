@@ -42,15 +42,20 @@ The dataset is fetched automatically via [PyTDC](https://tdcommons.ai/) rather t
 ```bash
 python -m src.features        # downloads DAVIS, extracts features -> data/davis_features.csv
 python -m src.train_baseline  # trains baseline models -> results/
+python -m src.train_stacked   # adds a stacked ensemble on top -> results/
 ```
 
 🤖 Baseline Models
 Random Forest, XGBoost, and a Ridge regression baseline are trained on the extracted drug + protein descriptors to predict pKd (`-log10(Kd in M)`). Evaluated with RMSE, MAE, R², and Concordance Index (CI), the standard ranking metric for drug-target affinity tasks.
+
+🧠 Stacked Ensemble
+`src/train_stacked.py` adds a stacking layer on top of the three baselines: Ridge, Random Forest, and XGBoost are used as base learners, and their out-of-fold predictions (5-fold CV) are combined by a gradient-boosting meta-learner that learns which base model to trust in which region of feature space.
 
 | Model | RMSE | MAE | R² | CI |
 |---|---|---|---|---|
 | Ridge | 0.790 | 0.538 | 0.114 | 0.667 |
 | Random Forest | 0.652 | 0.399 | 0.396 | 0.815 |
 | XGBoost | 0.645 | 0.404 | 0.408 | 0.816 |
+| **Stacked Ensemble** | **0.638** | **0.378** | **0.422** | **0.823** |
 
-Descriptor-based features top out around R²≈0.41 — the next step to push performance further is learned representations (e.g. molecular graph embeddings for drugs, CNN/transformer embeddings for protein sequences) instead of hand-crafted descriptors.
+Descriptor-based features top out around R²≈0.42 even after stacking — the next step to push performance further is learned representations (e.g. molecular graph embeddings for drugs, CNN/transformer embeddings for protein sequences) instead of hand-crafted descriptors.
